@@ -123,6 +123,10 @@ public class FeedItem extends FeedComponent implements Serializable {
         this.hasChapters = hasChapters;
     }
 
+    public void saveCurrentPosition(FeedMedia feed) {
+
+    }
+
     public void updateFromOther(FeedItem other) {
         super.updateFromOther(other);
         if (other.imageUrl != null) {

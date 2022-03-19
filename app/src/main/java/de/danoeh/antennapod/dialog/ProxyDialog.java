@@ -62,6 +62,52 @@ public class ProxyDialog {
         View content = View.inflate(context, R.layout.proxy_settings, null);
         spType = content.findViewById(R.id.spType);
 
+        instantiateDialog(spType);
+
+        List<String> types = new ArrayList<>();
+        types.add(Proxy.Type.DIRECT.name());
+        types.add(Proxy.Type.HTTP.name());
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            types.add(Proxy.Type.SOCKS.name());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
+                android.R.layout.simple_spinner_item, types);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spType.setAdapter(adapter);
+        ProxyConfig proxyConfig = UserPreferences.getProxyConfig();
+        spType.setSelection(adapter.getPosition(proxyConfig.type.name()));
+
+        updateTextBoxes(proxyConfig, content);
+
+        if (proxyConfig.type == Proxy.Type.DIRECT) {
+            enableSettings(false);
+            setTestRequired(false);
+        }
+        spType.setOnItemSelectedListener(new ProxyAdapter());
+        txtvMessage = content.findViewById(R.id.txtvMessage);
+        checkValidity();
+        return dialog;
+    }
+
+    private class ProxyAdapter implements AdapterView.OnItemSelectedListener {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (position == 0) {
+                dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.GONE);
+            } else {
+                dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.VISIBLE);
+            }
+            enableSettings(position > 0);
+            setTestRequired(position > 0);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            enableSettings(false);
+        }
+    }
+
+    private void instantiateDialog(Spinner content) {
         dialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.pref_proxy_title)
                 .setView(content)
@@ -88,19 +134,9 @@ public class ProxyDialog {
             etPassword.getText().clear();
             setProxyConfig();
         });
+    }
 
-        List<String> types = new ArrayList<>();
-        types.add(Proxy.Type.DIRECT.name());
-        types.add(Proxy.Type.HTTP.name());
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            types.add(Proxy.Type.SOCKS.name());
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_spinner_item, types);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spType.setAdapter(adapter);
-        ProxyConfig proxyConfig = UserPreferences.getProxyConfig();
-        spType.setSelection(adapter.getPosition(proxyConfig.type.name()));
+    private void updateTextBoxes(ProxyConfig proxyConfig, View content) {
         etHost = content.findViewById(R.id.etHost);
         if (!TextUtils.isEmpty(proxyConfig.host)) {
             etHost.setText(proxyConfig.host);
@@ -121,30 +157,6 @@ public class ProxyDialog {
             etPassword.setText(proxyConfig.password);
         }
         etPassword.addTextChangedListener(requireTestOnChange);
-        if (proxyConfig.type == Proxy.Type.DIRECT) {
-            enableSettings(false);
-            setTestRequired(false);
-        }
-        spType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.GONE);
-                } else {
-                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.VISIBLE);
-                }
-                enableSettings(position > 0);
-                setTestRequired(position > 0);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                enableSettings(false);
-            }
-        });
-        txtvMessage = content.findViewById(R.id.txtvMessage);
-        checkValidity();
-        return dialog;
     }
 
     private void setProxyConfig() {

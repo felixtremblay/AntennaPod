@@ -28,6 +28,15 @@ public class AudioPlayer extends MediaPlayer implements IPlayer {
     }
 
     @Override
+    public void clearMediaPlayerListeners() {
+        this.setOnCompletionListener(x -> { });
+        this.setOnSeekCompleteListener(x -> { });
+        this.setOnErrorListener((x, y, z) -> false);
+        this.setOnBufferingUpdateListener((arg0, percent) -> { });
+        this.setOnInfoListener((arg0, what, extra) -> false);
+    }
+
+    @Override
     public void setDisplay(SurfaceHolder sh) {
         if (sh != null) {
             Log.e(TAG, "Setting display not supported in Audio Player");

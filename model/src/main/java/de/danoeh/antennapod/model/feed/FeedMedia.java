@@ -86,6 +86,21 @@ public class FeedMedia extends FeedFile implements Playable {
     }
 
     @Override
+    public void saveCurrentPosition(int newPosition, long timestamp) {
+        this.setPosition(newPosition);
+        this.setLastPlayedTime(timestamp);
+        FeedItem item = this.getItem();
+        if (item != null && item.isNew()) {
+            DBWriter.markItemPlayed(FeedItem.UNPLAYED, item.getId());
+        }
+        if (this.getStartPosition() >= 0 && this.getPosition() > this.getStartPosition()) {
+            this.setPlayedDuration(this.getPlayedDurationWhenStarted()
+                    + this.getPosition() - this.getStartPosition());
+        }
+        DBWriter.setFeedMediaPlaybackInformation(this);
+    }
+
+    @Override
     public String getHumanReadableIdentifier() {
         if (item != null && item.getTitle() != null) {
             return item.getTitle();

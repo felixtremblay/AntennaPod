@@ -2,6 +2,8 @@ apply plugin: "com.android.library"
 apply from: "../common.gradle"
 
 dependencies {
+    implementation project(path: ':core')
+    implementation project(path: ':core')
     annotationProcessor "androidx.annotation:annotation:$annotationVersion"
     implementation "androidx.media:media:$mediaVersion"
 

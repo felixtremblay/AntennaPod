@@ -11,6 +11,15 @@ public class VideoPlayer extends MediaPlayer implements IPlayer {
     private static final String TAG = "VideoPlayer";
 
     @Override
+    public void clearMediaPlayerListeners() {
+        this.setOnCompletionListener(x -> { });
+        this.setOnSeekCompleteListener(x -> { });
+        this.setOnErrorListener((mediaPlayer, i, i1) -> false);
+        this.setOnBufferingUpdateListener((mediaPlayer, i) -> { });
+        this.setOnInfoListener((mediaPlayer, i, i1) -> false);
+    }
+
+    @Override
     public boolean canDownmix() {
         return false;
     }

@@ -218,6 +218,7 @@ public class CoverFragment extends Fragment {
 
     private void refreshChapterData(int chapterIndex) {
         if (chapterIndex > -1) {
+
             if (media.getPosition() > media.getDuration() || chapterIndex >= media.getChapters().size() - 1) {
                 displayedChapterIndex = media.getChapters().size() - 1;
                 butNextChapter.setVisibility(View.INVISIBLE);

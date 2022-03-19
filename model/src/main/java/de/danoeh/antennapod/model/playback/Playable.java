@@ -30,6 +30,8 @@ public interface Playable extends Parcelable, Serializable {
      */
     String getEpisodeTitle();
 
+    void saveCurrentPosition(int newPosition, long timestamp);
+
     /**
      * Returns a list of chapter marks or null if this Playable has no chapters.
      */

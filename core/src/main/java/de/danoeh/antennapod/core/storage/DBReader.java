@@ -56,6 +56,7 @@ public final class DBReader {
 
 
     private DBReader() {
+        //added a comment
     }
 
     /**

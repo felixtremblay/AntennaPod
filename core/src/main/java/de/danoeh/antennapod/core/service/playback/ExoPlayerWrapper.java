@@ -81,6 +81,15 @@ public class ExoPlayerWrapper implements IPlayer {
                 });
     }
 
+    @Override
+    public void clearMediaPlayerListeners() {
+        this.setOnCompletionListener(x -> { });
+        this.setOnSeekCompleteListener(x -> { });
+        this.setOnBufferingUpdateListener((arg0, percent) -> { });
+        this.setOnErrorListener(x -> { });
+        this.setOnInfoListener((arg0, what, extra) -> false);
+    }
+
     private void createPlayer() {
         DefaultLoadControl.Builder loadControl = new DefaultLoadControl.Builder();
         loadControl.setBufferDurationsMs(30000, 120000,

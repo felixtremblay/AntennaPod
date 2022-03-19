@@ -1044,28 +1044,7 @@ public class LocalPSMP extends PlaybackServiceMediaPlayer {
     }
 
     private void clearMediaPlayerListeners() {
-        if (mediaPlayer instanceof VideoPlayer) {
-            VideoPlayer vp = (VideoPlayer) mediaPlayer;
-            vp.setOnCompletionListener(x -> { });
-            vp.setOnSeekCompleteListener(x -> { });
-            vp.setOnErrorListener((mediaPlayer, i, i1) -> false);
-            vp.setOnBufferingUpdateListener((mediaPlayer, i) -> { });
-            vp.setOnInfoListener((mediaPlayer, i, i1) -> false);
-        } else if (mediaPlayer instanceof AudioPlayer) {
-            AudioPlayer ap = (AudioPlayer) mediaPlayer;
-            ap.setOnCompletionListener(x -> { });
-            ap.setOnSeekCompleteListener(x -> { });
-            ap.setOnErrorListener((x, y, z) -> false);
-            ap.setOnBufferingUpdateListener((arg0, percent) -> { });
-            ap.setOnInfoListener((arg0, what, extra) -> false);
-        } else if (mediaPlayer instanceof ExoPlayerWrapper) {
-            ExoPlayerWrapper ap = (ExoPlayerWrapper) mediaPlayer;
-            ap.setOnCompletionListener(x -> { });
-            ap.setOnSeekCompleteListener(x -> { });
-            ap.setOnBufferingUpdateListener((arg0, percent) -> { });
-            ap.setOnErrorListener(x -> { });
-            ap.setOnInfoListener((arg0, what, extra) -> false);
-        }
+        mediaPlayer.clearMediaPlayerListeners();
     }
 
     private final MediaPlayer.OnCompletionListener audioCompletionListener =

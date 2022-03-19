@@ -142,8 +142,28 @@ public class FeedItemPermutors {
      */
     private static void smartShuffle(List<FeedItem> queue, boolean ascending) {
 
-        // Divide FeedItems into lists by feed
+        Map<Long, List<FeedItem>> map = divideFeedItems(queue);
 
+        long spread = calculateMapSpread(map, ascending);
+
+        // Create a list of the individual FeedItems lists, and sort it by feed title (ascending).
+        // Doing this ensures that the feed order we use is predictable/deterministic.
+
+        List<List<FeedItem>> feeds = new ArrayList<>(map.values());
+        Collections.sort(feeds,
+                (f1, f2) -> f1.get(0).getFeed().getTitle().compareTo(f2.get(0).getFeed().getTitle()));
+        // Spread each episode out
+        Map<Long, List<FeedItem>> spreadItems = spreadEpisodes(feeds, spread);
+
+        // Go through the spread items and add them to the queue
+        List<Long> spreads = new ArrayList<>(spreadItems.keySet());
+        Collections.sort(spreads);
+        for (long itemSpread : spreads) {
+            queue.addAll(spreadItems.get(itemSpread));
+        }
+    }
+
+    private static Map<Long, List<FeedItem>> divideFeedItems(List<FeedItem> queue) {
         Map<Long, List<FeedItem>> map = new HashMap<>();
 
         while (!queue.isEmpty()) {
@@ -154,15 +174,13 @@ public class FeedItemPermutors {
             }
             map.get(id).add(item);
         }
+        return map;
+    }
 
-        // Sort each individual list by PubDate (ascending/descending)
-
+    private static long calculateMapSpread(Map<Long, List<FeedItem>> map, boolean ascending) {
         Comparator<FeedItem> itemComparator = ascending
-            ? (f1, f2) -> f1.getPubDate().compareTo(f2.getPubDate())
-            : (f1, f2) -> f2.getPubDate().compareTo(f1.getPubDate());
-
-        // Calculate the spread
-
+                ? (f1, f2) -> f1.getPubDate().compareTo(f2.getPubDate())
+                : (f1, f2) -> f2.getPubDate().compareTo(f1.getPubDate());
         long spread = 0;
         for (Map.Entry<Long, List<FeedItem>> mapEntry : map.entrySet()) {
             List<FeedItem> feedItems = mapEntry.getValue();
@@ -173,15 +191,10 @@ public class FeedItemPermutors {
                 spread *= feedItems.size();
             }
         }
+        return spread;
+    }
 
-        // Create a list of the individual FeedItems lists, and sort it by feed title (ascending).
-        // Doing this ensures that the feed order we use is predictable/deterministic.
-
-        List<List<FeedItem>> feeds = new ArrayList<>(map.values());
-        Collections.sort(feeds,
-                (f1, f2) -> f1.get(0).getFeed().getTitle().compareTo(f2.get(0).getFeed().getTitle()));
-
-        // Spread each episode out
+    private static Map<Long, List<FeedItem>> spreadEpisodes(List<List<FeedItem>> feeds, long spread) {
         Map<Long, List<FeedItem>> spreadItems = new HashMap<>();
         for (List<FeedItem> feedItems : feeds) {
             long thisSpread = spread / feedItems.size();
@@ -190,21 +203,20 @@ public class FeedItemPermutors {
             }
             // Starting from 0 ensures we front-load, so the queue starts with one episode from
             // each feed in the queue
-            long itemSpread = 0;
-            for (FeedItem feedItem : feedItems) {
-                if (!spreadItems.containsKey(itemSpread)) {
-                    spreadItems.put(itemSpread, new ArrayList<>());
-                }
-                spreadItems.get(itemSpread).add(feedItem);
-                itemSpread += thisSpread;
-            }
+            spreadItemsInFeed(feedItems, spreadItems, thisSpread);
         }
+        return spreadItems;
+    }
 
-        // Go through the spread items and add them to the queue
-        List<Long> spreads = new ArrayList<>(spreadItems.keySet());
-        Collections.sort(spreads);
-        for (long itemSpread : spreads) {
-            queue.addAll(spreadItems.get(itemSpread));
+    private static void spreadItemsInFeed(List<FeedItem> feedItems,
+                                          Map<Long, List<FeedItem>> spreadItems , long spread) {
+        long itemSpread = 0;
+        for (FeedItem feedItem : feedItems) {
+            if (!spreadItems.containsKey(itemSpread)) {
+                spreadItems.put(itemSpread, new ArrayList<>());
+            }
+            spreadItems.get(itemSpread).add(feedItem);
+            itemSpread += spread;
         }
     }
 }

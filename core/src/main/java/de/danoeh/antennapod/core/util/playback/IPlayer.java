@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IPlayer {
+
+    void clearMediaPlayerListeners();
+
     boolean canDownmix();
 
     int getCurrentPosition();
